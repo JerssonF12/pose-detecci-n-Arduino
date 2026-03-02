@@ -3,23 +3,39 @@ import mediapipe as mp
 import serial
 import time
 import pyttsx3
+import threading
 
-# Inicializar voz
-engine = pyttsx3.init()
-engine.setProperty('rate', 150)
+# ---------------------------
+# FUNCIÓN PARA HABLAR
+# ---------------------------
+def hablar(texto):
+    def run():
+        engine = pyttsx3.init()
+        engine.setProperty('rate', 150)
+        engine.say(texto)
+        engine.runAndWait()
+    threading.Thread(target=run).start()
 
-# Conectar Arduino 
-arduino = serial.Serial('COM3', 9600)
+# ---------------------------
+# CONEXIÓN ARDUINO
+# ---------------------------
+arduino = serial.Serial('COM3', 9600) 
 time.sleep(2)
 
+# ---------------------------
+# MEDIAPIPE
+# ---------------------------
 mp_pose = mp.solutions.pose
 mp_drawing = mp.solutions.drawing_utils
 pose = mp_pose.Pose()
 
 cap = cv2.VideoCapture(0)
 
-estado_anterior = ""
+estado_anterior = "INDETERMINADO"
 
+# ---------------------------
+# ENLACE PRINCIPAL
+# ---------------------------
 while cap.isOpened():
     ret, frame = cap.read()
     if not ret:
@@ -34,17 +50,27 @@ while cap.isOpened():
         hip = landmarks[mp_pose.PoseLandmark.LEFT_HIP]
         knee = landmarks[mp_pose.PoseLandmark.LEFT_KNEE]
 
-        if knee.y - hip.y > 0.15:
-            estado = "PARADO"
-            comando = b'P'
-        else:
-            estado = "SENTADO"
-            comando = b'S'
+        diferencia = knee.y - hip.y
 
+        # RANGOS
+        if diferencia > 0.20:
+            estado = "PARADO"
+        elif diferencia < 0.10:
+            estado = "SENTADO"
+        else:
+            estado = estado_anterior #MANTIENE EL ESTADO SI NO ES CLARO
+
+        # SOLO SI CAMBIA
         if estado != estado_anterior:
-            arduino.write(comando)
-            engine.say(estado)
-            engine.runAndWait()
+
+            if estado == "PARADO":
+                arduino.write(b'P')
+                hablar("Persona parada")
+
+            elif estado == "SENTADO":
+                arduino.write(b'S')
+                hablar("Persona sentada")
+
             estado_anterior = estado
 
         cv2.putText(frame, estado, (50, 50),
