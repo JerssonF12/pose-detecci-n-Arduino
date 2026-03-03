@@ -1,6 +1,12 @@
-# pose-detecci-n-Arduino
+# Pose Landmark Detection - Arduino
 Sistema de detección de postura con MediaPipe y Arduino
 
+## Explicación del código
+El sistema se basa en el uso de la librería MediaPipe Pose, la cual permite detectar puntos clave del cuerpo humano mediante modelos de aprendizaje automático. Se emplean los puntos anatómicos de la cadera (hip) y la rodilla (knee) para determinar la postura.
+La condición utilizada fue:
+
+kneey − hipy > 0,15
+Si la diferencia es mayor al umbral definido, el sistema interpreta que la persona está de pie; de lo contrario, se considera que está sentada.
 
 ## Descripción del trabajo
 
@@ -18,11 +24,11 @@ Cuando detecta un cambio de estado:
 
 ## Aplicaciones y repositorios Utilizados
 
-- Python 3.11
+- Python 3.11.x
 - OpenCV
 - MediaPipe
 - PySerial
-- pyttsx3
+- pyttsx3 (adicional implementando voz)
 - Arduino
 
 ---
