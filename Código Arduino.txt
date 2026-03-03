@@ -1,0 +1,26 @@
+---- Código Arduino -----
+
+const int ledRojo = 8;
+const int ledVerde = 9;
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(ledRojo, OUTPUT);
+  pinMode(ledVerde, OUTPUT);
+}
+
+void loop() {
+  if (Serial.available() > 0) {
+    char estado = Serial.read();
+
+    if (estado == 'P') {
+      digitalWrite(ledRojo, HIGH);
+      digitalWrite(ledVerde, LOW);
+    }
+
+    if (estado == 'S') {
+      digitalWrite(ledRojo, LOW);
+      digitalWrite(ledVerde, HIGH);
+    }
+  }
+}
